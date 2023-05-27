@@ -202,12 +202,12 @@ class LaravelElasticsearchQueryBuilder {
 			case '>=':
 				$this->query['bool'][$or ? 'should' : 'filter'][] = ['range' => [$column => ['gte' => $value]]];
 				break;
-			case 'like':
-//				if( ! isset($this->model->mappingProperties[$column]['analyzer']) || $this->model->mappingProperties[$column]['analyzer'] != 'snowball') {
-//					throw new \Exception('Only the column with "snowball" analyzer is capable of the "like" operation.');
-//				}
-				$this->query['bool'][$or ? 'should' : 'must'][] = ['match' => [$column => $value]];
-				break;
+// 			case 'like':
+// //				if( ! isset($this->model->mappingProperties[$column]['analyzer']) || $this->model->mappingProperties[$column]['analyzer'] != 'snowball') {
+// //					throw new \Exception('Only the column with "snowball" analyzer is capable of the "like" operation.');
+// //				}
+// 				$this->query['bool'][$or ? 'should' : 'must'][] = ['match' => [$column => $value]];
+// 				break;
 			case '!=':
 				if($or) {
 					if($value === null) {
@@ -227,9 +227,10 @@ class LaravelElasticsearchQueryBuilder {
 					}
 				}
 				break;
+			case 'like':
 			case '*':
 				$this->query['bool'][$or ? 'should' : 'filter'][] = ['wildcard' => [
-					$column => $value
+					$column => str_replace('%', '*', $value)
 				]];
 				break;
 		}

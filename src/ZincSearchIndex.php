@@ -50,7 +50,7 @@ class ZincSearchIndex extends Index
 
             return json_encode($item);
         })
-            ->join('\n');
+            ->join("\n");
 
         $result = $this->client->withBody($documents, 'application/json')
             ->post('api/'.$this->name.'/_multi');

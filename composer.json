@@ -1,0 +1,22 @@
+{
+    "name": "thoughtco/zinc-search",
+    "autoload": {
+        "psr-4": {
+            "Thoughtco\\ZincSearch\\": "src"
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Zinc Search",
+            "description": "Zinc Search addon"
+        },
+        "laravel": {
+            "providers": [
+                "Thoughtco\\ZincSearch\\ServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "elasticsearch/elasticsearch": "^7.7.0"
+    }
+}

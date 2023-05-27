@@ -1148,6 +1148,7 @@ class LaravelElasticsearchQueryBuilder {
 		}
 
 		if( ! $this->raw_results) {
+            $this->page($page ?? 1, $this->records_per_page);
             $this->get();
 			//throw new \Exception('Method invoked before get()');
 		}

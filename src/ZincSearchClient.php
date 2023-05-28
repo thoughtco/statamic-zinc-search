@@ -4,6 +4,8 @@ namespace Thoughtco\ZincSearch;
 
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Statamic\Facades\Collection;
 
 class ZincSearchClient
 {
@@ -21,8 +23,18 @@ class ZincSearchClient
             $config['searchable_fields'] = false;
         }
 
+        $listableFields = [];
+        if (count($config['searchables']) == 1) {
+            $collectionHandle = Str::after($config['searchables'][0], ':');
+            $collection = Collection::find($collectionHandle);
+            if ($collection) {
+                $listableFields = $collection->entryBlueprint()->columns()->rejectUnlisted()->map->field()->values();
+            }
+        }
+
         $config['fields'] = collect($config['fields'])
             ->merge($config['searchable_fields'])
+            ->merge($listableFields)
             ->flatten()
             ->unique()
             ->filter()

@@ -44,6 +44,7 @@ class LaravelElasticsearchQueryBuilder {
 	private $validation = 'strict';
 	private $mapping_properties = false;
 	private $key_name = 'id';
+	private $config = [];
 
 	/**
 	 * @return string
@@ -162,7 +163,7 @@ class LaravelElasticsearchQueryBuilder {
 	 */
 	public function where($column, $operator = null, $value = null, $or = false, $boost = false) {
 		if(is_callable($column) && ! is_string($column)) {
-			$builder = new LaravelElasticsearchQueryBuilder($this->model, $this->prepended_path);
+			$builder = new LaravelElasticsearchQueryBuilder($this->config, $this->model, $this->prepended_path);
 			$column($builder);
 			$query = $builder->getQuery();
 			$query['bool']['minimum_should_match'] = 1;
@@ -296,7 +297,7 @@ class LaravelElasticsearchQueryBuilder {
 				break;
 			case '!=':
 				if($or) {
-					$builder = new LaravelElasticsearchQueryBuilder($this->model);
+					$builder = new LaravelElasticsearchQueryBuilder($this->config, $this->model);
 					$builder->where($column, '!=', $value);
 					if(isset($this->query['bool']['should']['bool'])) {
 						$this->query['bool']['should']['bool']['must_not'][] = [(is_array($value) ? 'terms' : 'term') => [$column => $value]];
@@ -403,14 +404,14 @@ class LaravelElasticsearchQueryBuilder {
 	 */
 	public function whereHas($column, $closure = null, $or = false, $boost = false) {
 		if(is_callable($column) && ! is_string($column)) {
-			$builder = new LaravelElasticsearchQueryBuilder($this->model, $this->prepended_path);
+			$builder = new LaravelElasticsearchQueryBuilder($this->config, $this->model, $this->prepended_path);
 			$column($builder);
 			$this->query['bool']['must'][] = $builder->getQuery();
 			return $this;
 		}
 		$column_bak = $column;
 		$this->getMappingProperty($column, true);
-		$builder = $this->nested_queries[$column_bak] ?? new LaravelElasticsearchQueryBuilder($this->model, $column_bak);
+		$builder = $this->nested_queries[$column_bak] ?? new LaravelElasticsearchQueryBuilder($this->config, $this->model, $column_bak);
 		$closure($builder);
 		$nested_query = $this->createNestedQuery($column_bak, $builder, '');
 		$this->query['bool'][$or ? 'should' : 'filter'][] =
@@ -445,7 +446,7 @@ class LaravelElasticsearchQueryBuilder {
 		} else {
 			$column_bak = $column;
 			$this->getMappingProperty($column, true);
-			$builder = $this->nested_queries[$column_bak] ?? new LaravelElasticsearchQueryBuilder($this->model, $column_bak);
+			$builder = $this->nested_queries[$column_bak] ?? new LaravelElasticsearchQueryBuilder($this->config, $this->model, $column_bak);
 			$closure($builder);
 			$nested_query = $this->createNestedQuery($column_bak, $builder, '');
 			$this->query['bool'][$or ? 'should' : 'filter'][] = [
@@ -515,7 +516,7 @@ class LaravelElasticsearchQueryBuilder {
 	 */
 	public function orWhere($column, $operator = null, $value = null, $boost = false) {
 		if(is_callable($column) && ! is_string($column)) {
-			$builder = new LaravelElasticsearchQueryBuilder($this->model, $this->prepended_path);
+			$builder = new LaravelElasticsearchQueryBuilder($this->config, $this->model, $this->prepended_path);
 			$column($builder);
 			$query = $builder->getQuery();
 			$this->query['bool']['minimum_should_match'] = 1;
@@ -840,7 +841,7 @@ class LaravelElasticsearchQueryBuilder {
 	 * @throws \Exception
 	 */
 	public function aggregate($name, $agg) {
-		$builder = new LaravelElasticsearchQueryBuilder($this->model, $this->prepended_path);
+		$builder = new LaravelElasticsearchQueryBuilder($this->config, $this->model, $this->prepended_path);
 		$agg($builder);
 		$aggregation = [];
 		$query = $builder->getQuery();
@@ -873,7 +874,7 @@ class LaravelElasticsearchQueryBuilder {
 	 * @throws \Exception
 	 */
 	public function aggregateAll($name, $agg) {
-		$builder = new LaravelElasticsearchQueryBuilder($this->model, $this->prepended_path);
+		$builder = new LaravelElasticsearchQueryBuilder($this->config, $this->model, $this->prepended_path);
 		$this->aggs['all_' . $name] = [
 			'global' => new \stdClass(),
 			'aggs' => $builder->aggregate($name, $agg)->getAggs()
@@ -964,7 +965,7 @@ class LaravelElasticsearchQueryBuilder {
 	public function aggregateOn($relation, $agg, $custom_name = null) {
 		$this->getMappingProperty($relation, true);
 		$custom_name = $custom_name ?? snake_case($relation);
-		$builder = new LaravelElasticsearchQueryBuilder($this->model, $relation);
+		$builder = new LaravelElasticsearchQueryBuilder($this->config, $this->model, $relation);
 		$this->aggs[$custom_name] = [
 			'nested' => [
 				'path' => snake_case($relation)
@@ -1083,7 +1084,7 @@ class LaravelElasticsearchQueryBuilder {
 	 * LaravelElasticsearchQueryBuilder constructor.
 	 * @param array $config
 	 */
-	public function __construct($config, $model = null) {
+	public function __construct($config, $model = null, $prepended_path = false) {
 		$this->query = ['bool' => [
 			'must'      => [],
 			'filter'    => [
@@ -1091,9 +1092,10 @@ class LaravelElasticsearchQueryBuilder {
 			],
 			'must_not'  => []
 		]];
-		$this->prepended_path = false;
+		$this->prepended_path = $prepended_path;
 		$this->model = $model;
 		$this->es_client = $this->createClient($config);
+		$this->config = $config;
 		$this->mapping_properties = $model->mappingProperties ?? false;
 		$this->index_name = $model && method_exists($model, 'getIndexName') ? $model->getIndexName() : 'index_name';
 		$this->type_name = $model && method_exists($model, 'getTypeName') ? $model->getTypeName() :

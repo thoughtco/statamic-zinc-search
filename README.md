@@ -37,6 +37,7 @@ Set up a search index for the collection e.g.
     'driver' => 'zincsearch',
     'searchables' => ['collection:pages'],
     'fields' => ['id', 'title', 'url', 'content', 'status'],
+    'searchable_fields' => ['title, 'slug'],
     'settings' => [],
 ],
 ```

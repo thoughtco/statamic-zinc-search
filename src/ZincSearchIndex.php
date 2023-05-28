@@ -27,9 +27,13 @@ class ZincSearchIndex extends Index
         parent::__construct($name, $config, $locale);
     }
 
-    public function search($query)
+    public function search($searchString)
     {
-        return $this->queryBuilder->where('title', 'like', $query.'%');
+        return $this->queryBuilder->where(function ($query) use ($searchString) {
+            foreach (($this->config['searchable_fields'] ?: ['_id']) as $index => $field) {
+                $query->{$index == 0 ? 'where' : 'orWhere'}($field, 'like', $searchString.'%');
+            }
+        });
     }
 
     public function delete($document)

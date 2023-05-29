@@ -24,7 +24,7 @@ class ZincSearchClient
         }
 
         $listableFields = [];
-        if (count($config['searchables']) == 1) {
+        if (count($config['searchables']) == 1 && Str::before($config['searchables'][0], ':') == 'collection') {
             $collectionHandle = Str::after($config['searchables'][0], ':');
             $collection = Collection::find($collectionHandle);
             if ($collection) {

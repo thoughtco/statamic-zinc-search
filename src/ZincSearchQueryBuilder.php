@@ -40,13 +40,17 @@ class ZincSearchQueryBuilder extends LaravelElasticsearchQueryBuilder
         if (! $this->withData) {
             return $this->collect($results)
                 ->map(fn ($result) => new PlainResult($result))
-                ->each(fn (Result $result, $i) => $result->setIndex($this->index)->setScore($results[$i]['search_score'] ?? null));
+                ->each(fn (Result $result, $i) => $result->setIndex($this->index)->setScore($results[$i]['_score'] ?? null));
         }
 
         return $this->collect($results)->groupBy(function ($result) {
             return Str::before($result['_id'], '::');
         })->flatMap(function ($results, $prefix) {
-            $results = $results->keyBy('_id');
+            $results = $results->map(function ($result, $idx) {
+                $result['_count'] = $idx;
+                return $result;
+            })->keyBy('_id');
+
             $ids = $results->map(fn ($result) => Str::after($result['_id'], $prefix.'::'))->values()->all();
 
             return app(Providers::class)
@@ -57,10 +61,10 @@ class ZincSearchQueryBuilder extends LaravelElasticsearchQueryBuilder
                     return $result
                         ->setIndex($this->index)
                         ->setRawResult($raw = $results[$result->getReference()])
-                        ->setScore($raw['_score'] ?? null);
+                        ->setScore($raw['_count'] ?? 9999);
                 });
         })
-        ->sortByDesc->getScore()
+        ->sortBy->getScore()
         ->values();
     }
 

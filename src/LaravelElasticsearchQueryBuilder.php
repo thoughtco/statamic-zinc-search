@@ -759,16 +759,16 @@ class LaravelElasticsearchQueryBuilder {
 			}
 		}
 		if($script) {
-			$this->order['_script'] = ['type' => 'number', 'script' => $script, 'order' => $order];
+			$this->order[] = ['_script' => ['type' => 'number', 'script' => $script, 'order' => $order]];
 			return $this;
 		}
 		if($is_relation) {
-			$this->order[snake_case($column) . $sub_field] = [
+			$this->order[] = [snake_case($column) . $sub_field => [
 				'order' => $order,
 				'nested_path'  => implode('.', array_slice(explode('.', $name), 0, count(explode('.', $name)) - 1))
-			];
+			]];
 		} else {
-			$this->order[snake_case($column) . $sub_field] = ['order' => $order];
+			$this->order[] = [snake_case($column).$sub_field => ['order' => $order]];
 		}
 		return $this;
 	}

@@ -85,7 +85,7 @@ class ZincSearchIndex extends Index
 
     private function throwException($error)
     {
-        throw new \Exception('ZincSearch: '.$error);
+        throw new Exception('ZincSearch: '.$error);
     }
 
     private function updateMappings($document)
@@ -105,7 +105,7 @@ class ZincSearchIndex extends Index
                     $value = Carbon::parse($value)->format('c');
                     $type = 'date';
                     $extra['format'] = '2006-01-02T15:04:05+07:00';
-                } catch (Exception $e) { }
+                } catch (\Throwable $e) { }
             }
 
             return [

@@ -39,7 +39,11 @@ class ZincSearchQueryBuilder extends LaravelElasticsearchQueryBuilder
     {
         if (! $this->withData) {
             return $this->collect($results)
-                ->map(fn ($result) => new PlainResult($result))
+                ->map(function ($result) {
+                    $result = $result['_source'];
+                    $result['reference'] = $result['_id'];
+                    return new PlainResult($result);
+                })
                 ->each(fn (Result $result, $i) => $result->setIndex($this->index)->setScore($results[$i]['_score'] ?? null));
         }
 

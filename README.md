@@ -79,11 +79,3 @@ e.g.
 {{ /search:results }}
 ```
 
-
-
-# TO DO
-
-PR to core to allow entry listing to ALWAYS use search index - maybe based on config value in search index being present?
-
-PR to core to allow search index tag to accept query scopes
-

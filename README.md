@@ -1,12 +1,14 @@
-# Zinc Search
+# ZincSearch
 
-> Zinc Search is a Statamic addon to speed up your listing views in the control by using the power of [Zinc Search](https://zincsearch-docs.zinc.dev).
+> ZincSearch is a Statamic addon to speed up your listing views in the control by using the power of [ZincSearch](https://zincsearch-docs.zinc.dev).
 
 ## Features
 
 This addon makes your control panel listings go super-dooper-fast.
 
 ## How to Install
+
+Ensure you have a working [ZincSearch installation](https://zincsearch-docs.zinc.dev/installation/).
 
 Run the following command from your project root:
 
@@ -62,6 +64,20 @@ search_index: pages
 ## Antlers / Front end
 
 To make use of this use the speed of this search in your front end, use the `search_index` tag instead of `collection`.
+
+e.g.
+
+```antlers
+{{ search:results index="pages" supplement_data="false" for="*" as="results" limit="10" offset="0" paginate="10" }}
+    {{ if no_results }}
+    No results
+    {{ else }}
+        {{ results }}
+        <p>{{ id }} - {{ title }}</p>
+        {{ /results }}
+    {{ /if }}
+{{ /search:results }}
+```
 
 
 

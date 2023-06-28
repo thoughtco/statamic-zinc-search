@@ -40,7 +40,7 @@ class ZincSearchQueryBuilder extends LaravelElasticsearchQueryBuilder
         if (! $this->withData) {
             return $this->collect($results)
                 ->map(function ($result) {
-                    $result = $result['_source'];
+                    $result = $result['_source'] ?? $result;
                     $result['reference'] = $result['_id'];
                     return new PlainResult($result);
                 })

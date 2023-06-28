@@ -77,6 +77,12 @@ class ZincSearchQueryBuilder extends LaravelElasticsearchQueryBuilder
         return new DataCollection($items);
     }
 
+    public function get()
+    {
+        parent::get();
+        return $this->getBaseItems($this->toArray());
+    }
+
     public function paginate($perPage = null, $columns = ['*'], $pageName = 'page', $page = null)
     {
         $result = parent::paginate($perPage);
